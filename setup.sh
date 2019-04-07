@@ -5,8 +5,6 @@ if [[ ! -d Titan/webapp ]]; then
 fi
 basedir=$(pwd)
 
-if (( 3 == 1 )); then
-
 apt -y install build-essential checkinstall
 apt -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
 apt -y install python libffi-dev
@@ -25,8 +23,6 @@ make altinstall
 cd $basedir
 cd Titan
 pip3.7 install -r requirements.txt
-
-fi
 
 # Create database
 pip3.7 install postgres
