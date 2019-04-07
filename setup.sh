@@ -22,5 +22,5 @@ make altinstall
 
 cd $basedir
 cd Titan
-pip install -r requirements.txt
+pip3.7 install -r requirements.txt
 
