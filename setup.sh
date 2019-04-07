@@ -13,7 +13,7 @@ apt -y install sudo
 
 cd /tmp
 mkdir python
-cd pyton
+cd python
 wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
 tar xzf Python-3.7.3.tgz
 cd Python-3.7.3
@@ -25,7 +25,7 @@ cd Titan
 pip3.7 install -r requirements.txt
 
 # Create database
-pip3.7 install postgres
+pip3.7 install psycopg2
 echo "create database titan;
 create user titan with encrypted password 'titan';
 grant all privileges on database titan to titan;" | sudo -u postgres psql
@@ -72,3 +72,9 @@ alembic upgrade head
 
 # Install redis-server (it automatically gets enabled with systemd too)
 apt -y install redis
+
+# Install web server
+pip3.7 install gunicorn
+pip3.7 install eventlet
+pip3.7 install config
+
