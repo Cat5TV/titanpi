@@ -25,7 +25,7 @@ cd Titan
 pip3.7 install -r requirements.txt
 
 # Create database
-pip3.7 install psycopg2
+pip3.7 install psycopg2-binary
 echo "create database titan;
 create user titan with encrypted password 'titan';
 grant all privileges on database titan to titan;" | sudo -u postgres psql
@@ -77,4 +77,7 @@ apt -y install redis
 pip3.7 install gunicorn
 pip3.7 install eventlet
 pip3.7 install config
+
+# Create web folder
+mkdir /var/www
 
