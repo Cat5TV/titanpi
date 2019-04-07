@@ -6,6 +6,7 @@ fi
 basedir=$(pwd)
 
 if (( 3 == 1 )); then
+
 apt -y install build-essential checkinstall
 apt -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
 apt -y install python libffi-dev
@@ -29,6 +30,7 @@ fi
 
 cd ~
 mkdir alembic
+cd alembic
 pip3.7 install alembic
 cd webapp
 cp alembic.example.ini alembic.ini
