@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ ! -d Titan ]]; then
+if [[ ! -d Titan/webapp ]]; then
   echo "Titan is missing. Did you clone this repo with --recursive ?"
   exit 1
 fi
@@ -28,9 +28,8 @@ pip3.7 install -r requirements.txt
 
 fi
 
-cd ~
-mkdir alembic
-cd alembic
+# Install and setup Alembic
+cd $basedir
 pip3.7 install alembic
-cd webapp
+cd Titan/webapp
 cp alembic.example.ini alembic.ini
