@@ -1,16 +1,23 @@
 #!/bin/bash
-if [[ ! -d Titan/webapp ]]; then
-  echo "Titan is missing. Did you clone this repo with --recursive ?"
-  exit 1
-fi
 basedir=$(pwd)
 
+# Get the Titan source code
+if [[ ! -d /var/www ]]; then
+  mkdir /var/www
+fi
+if [[ ! -d /var/www/Titan/webapp ]]; then
+  cd /var/www
+  git clone https://github.com/TitanEmbeds/Titan
+fi
+
+# Install dependencies
 apt -y install build-essential checkinstall
 apt -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
 apt -y install python libffi-dev
 apt -y install postgresql postgresql-client
 apt -y install sudo
 
+# Install Python 3.7
 cd /tmp
 mkdir python
 cd python
@@ -20,8 +27,8 @@ cd Python-3.7.3
 ./configure --enable-optimizations
 make altinstall
 
-cd $basedir
-cd Titan
+# Install requirements
+cd /var/www/Titan
 pip3.7 install -r requirements.txt
 
 # Create database
@@ -31,11 +38,9 @@ create user titan with encrypted password 'titan';
 grant all privileges on database titan to titan;" | sudo -u postgres psql
 
 # Install and setup Alembic
-cd $basedir
 pip3.7 install alembic
 
 # Create config for Alembic
-cd $basedir
 echo "[alembic]
 script_location = alembic
 sqlalchemy.url = postgresql://titan:titan@localhost/titan
@@ -65,7 +70,10 @@ formatter = generic
 [formatter_generic]
 format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
-" > Titan/webapp/alembic.ini
+" > /var/www/Titan/webapp/alembic.ini
+
+# Create config.py
+
 
 # update the database headers (do this after every git pull)
 alembic upgrade head
@@ -130,3 +138,4 @@ server {
         root /var/www/wellknown/;
     }
 }' > /tmp/nginx.conf
+
