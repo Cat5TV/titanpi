@@ -19,6 +19,8 @@ chown titan:titan /var/www
 if [[ ! -d /var/www/Titan/webapp ]]; then
   cd /var/www
   git clone https://github.com/TitanEmbeds/Titan
+  # We will be adding configs, so let's just let this be a local version
+  rm -rf /var/www/Titan/.git
 fi
 
 # Install dependencies
@@ -98,6 +100,23 @@ pip3.7 install config
 # Create config.py
 ./config.sh
 
+# Install make-ssl-cert if it isn't already installed
+if [[ ! -e /usr/sbin/make-ssl-cert ]]; then
+  apt -y install ssl-cert
+fi
+
+# Generating new Snakeoil cert
+/usr/sbin/make-ssl-cert generate-default-snakeoil --force-overwrite
+
+# Combine for Webmin and other interfaces
+cat /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/private/ssl-cert-snakeoil.key > /etc/ssl/certs/ssl-cert-snakeoil-combined.pem
+# Cert is owned by root:root
+chmod 600 /etc/ssl/certs/ssl-cert-snakeoil-combined.pem
+# Generate unique SSH certs
+/bin/rm /etc/ssh/ssh_host_*
+dpkg-reconfigure openssh-server
+systemctl restart ssh
+
 # Create systemd service
 # https://github.com/TitanEmbeds/ansible-playbooks/blob/master/roles/setup/files/titanembeds.service#L8
 echo "
@@ -161,6 +180,12 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header X-Real-IP $remote_addr;
     }
+    listen 443 ssl;
+    ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+    ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+    if ($scheme != "https") {
+        return 301 https://$host$request_uri;
+    }
     location ^~ /static/ {
         include /etc/nginx/mime.types;
         root /var/www/Titan/webapp/titanembeds/;
@@ -177,3 +202,39 @@ server {
 rm /etc/nginx/sites-enabled/default
 
 systemctl restart nginx
+
+
+# Install and enable the bot
+echo "Description=Titan Discord Bot
+After=network.target
+
+[Service]
+User=titan
+WorkingDirectory=/var/www/Titan/discordbot/
+ExecStart=/usr/local/bin/python3.7 /var/www/Titan/discordbot/run.py
+Restart=always
+KillSignal=SIGQUIT
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/titanbot.service
+
+# Reload service config
+systemctl daemon-reload
+
+echo "
+config = {
+    'bot-token': "Discord bot token",
+    'database-uri': "postgresql://titan:titan@localhost/titan",
+    'redis-uri': "redis://",
+    'titan-web-url': "https://titanembeds.com/",
+    'titan-web-app-secret': "app secret from the webapp config",
+    'discord-bots-org-token': "DiscordBots.org Post Stats Token",
+    'bots-discord-pw-token': "bots.discord.pw Post Stats Token",
+    'logging-location': "/home/titan/Titan/discordbot/titanbot.log",
+    "sentry-dsn": "Copy the dns string when creating a project on sentry",
+}" > /var/www/Titan/discordbot/config.py
+
+systemctl start titanbot
+systemctl enable titanbot
+
