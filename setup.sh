@@ -2,7 +2,11 @@
 basedir=$(pwd)
 
 # Create titan user
-useradd -m titan
+if [[ ! -d /home/titan ]]; then
+  useradd -m titan
+fi
+
+apt update
 
 # Get the Titan source code
 if [[ ! -d /var/www ]]; then
