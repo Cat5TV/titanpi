@@ -133,7 +133,7 @@ upstream titanws {
     server unix:/var/www/titanembeds.sock fail_timeout=0;
 }
 server {
-    listen 80;
+    listen 80 default_server;
     server_name titanpi;
 
   location / {
@@ -167,6 +167,9 @@ server {
         include /etc/nginx/mime.types;
         root /var/www/wellknown/;
     }
-}' > /tmp/nginx.conf
+}' > /etc/nginx/conf.d/titanembeds.conf
+
+# Disable the default welcome site
+rm /etc/nginx/sites-enabled/default
 
 systemctl restart nginx
