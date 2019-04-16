@@ -87,6 +87,7 @@ datefmt = %H:%M:%S
 apt -y install redis-server
 
 # update the database headers (do this after every git pull)
+cd /var/www/Titan/webapp
 alembic upgrade head
 
 # Install web server
