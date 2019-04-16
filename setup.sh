@@ -148,14 +148,30 @@ systemctl status titanembeds
 apt -y install nginx
 
 # Create nginx conf
-echo 'upstream titan {
+echo 'server {
+  listen 80;
+  listen [::]:80;
+
+  root /var/www/dashboard/;
+  index index.php index.html index.htm;
+
+  location ~ \.php$ {
+      try_files $uri =404;
+      fastcgi_split_path_info ^(.+\.php)(/.+)$;
+      fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+      fastcgi_index index.php;
+      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          include fastcgi_params;
+      }
+}
+upstream titan {
     server unix:/var/www/titanembeds.sock fail_timeout=0;
 }
 upstream titanws {
     server unix:/var/www/titanembeds.sock fail_timeout=0;
 }
 server {
-    listen 80 default_server;
+    listen 8080 default_server;
     server_name titanpi;
 
   location / {
@@ -200,6 +216,15 @@ server {
 # Disable the default welcome site
 rm /etc/nginx/sites-enabled/default
 
+# Install TitanPi dashboard on Port 80
+cd $basedir
+cp -R dashboard /var/www/
+chown -R www-data:www-data /var/www/dashboard
+
+# Install PHP
+apt -y install php-fpm
+
+# Start everything up
 systemctl restart nginx
 
 
