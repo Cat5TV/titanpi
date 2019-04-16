@@ -72,8 +72,6 @@ format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
 " > /var/www/Titan/webapp/alembic.ini
 
-# Create config.py
-
 
 # update the database headers (do this after every git pull)
 alembic upgrade head
@@ -86,8 +84,39 @@ pip3.7 install gunicorn
 pip3.7 install eventlet
 pip3.7 install config
 
-# Create web folder for socket
-mkdir /var/www
+# Create config.py
+./config.sh
+
+# Create titan user
+useradd -m titan
+
+# Create systemd service
+# https://github.com/TitanEmbeds/ansible-playbooks/blob/master/roles/setup/files/titanembeds.service#L8
+echo "
+[Unit]
+Description=gunicorn server instance configured to serve titanembeds
+After=syslog.target
+
+[Service]
+User=titan
+WorkingDirectory=/var/www/Titan/webapp
+ExecStart=/usr/local/bin/gunicorn --worker-class eventlet -w 1 -b unix:/var/www/titanembeds.sock titanembeds.app:app
+TimeoutSec=infinity
+Restart=on-failure
+KillSignal=SIGTERM
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/titanembeds.service
+
+# Reload service config
+systemctl daemon-reload
+
+# Start Titan Embeds service
+systemctl start titanembeds
+systemctl enable titanembeds
+systemctl status titanembeds
 
 # Create nginx conf
 echo 'upstream titan {
@@ -139,3 +168,5 @@ server {
     }
 }' > /tmp/nginx.conf
 
+# install nginx
+apt -y install nginx
