@@ -159,7 +159,7 @@ server {
     }
     location ^~ /static/ {
         include /etc/nginx/mime.types;
-        root /home/titan/Titan/webapp/titanembeds/;
+        root /var/www/Titan/webapp/titanembeds/;
         etag on;
         if_modified_since before;
     }
@@ -169,3 +169,4 @@ server {
     }
 }' > /tmp/nginx.conf
 
+systemctl restart nginx
