@@ -4,11 +4,9 @@ Titan is running on port 8080
 
 <br /><br />
 
-su - postgres
-psql
-\c titan
-INSERT INTO administrators (user_id) VALUES (123456543);
-\q
+<?php $user_id = '416684403670908928'; ?>
+
+su -c "psql -d titan -c \"INSERT INTO administrators (user_id) VALUES (<?= $user_id ?>);\"" postgres
 
 <hr>
 
