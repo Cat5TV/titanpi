@@ -79,12 +79,11 @@ format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
 " > /var/www/Titan/webapp/alembic.ini
 
+# Install redis-server (it automatically gets enabled with systemd too)
+apt -y install redis-server
 
 # update the database headers (do this after every git pull)
 alembic upgrade head
-
-# Install redis-server (it automatically gets enabled with systemd too)
-apt -y install redis
 
 # Install web server
 pip3.7 install gunicorn
@@ -122,7 +121,7 @@ systemctl start titanembeds
 systemctl enable titanembeds
 systemctl status titanembeds
 
-# install nginx
+# Install nginx
 apt -y install nginx
 
 # Create nginx conf
