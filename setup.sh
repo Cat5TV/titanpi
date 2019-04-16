@@ -1,10 +1,17 @@
 #!/bin/bash
 basedir=$(pwd)
 
+# Create titan user
+useradd -m titan
+
 # Get the Titan source code
 if [[ ! -d /var/www ]]; then
   mkdir /var/www
 fi
+
+# Allow the titan user (systemd service runner) to read/write
+chown titan:titan /var/www
+
 if [[ ! -d /var/www/Titan/webapp ]]; then
   cd /var/www
   git clone https://github.com/TitanEmbeds/Titan
@@ -87,9 +94,6 @@ pip3.7 install config
 # Create config.py
 ./config.sh
 
-# Create titan user
-useradd -m titan
-
 # Create systemd service
 # https://github.com/TitanEmbeds/ansible-playbooks/blob/master/roles/setup/files/titanembeds.service#L8
 echo "
@@ -118,6 +122,9 @@ systemctl start titanembeds
 systemctl enable titanembeds
 systemctl status titanembeds
 
+# install nginx
+apt -y install nginx
+
 # Create nginx conf
 echo 'upstream titan {
     server unix:/var/www/titanembeds.sock fail_timeout=0;
@@ -127,7 +134,7 @@ upstream titanws {
 }
 server {
     listen 80;
-    server_name change_me;
+    server_name titanpi;
 
   location / {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -150,12 +157,6 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header X-Real-IP $remote_addr;
     }
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/change_me/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/change_me/privkey.pem;
-    if ($scheme != "https") {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
     location ^~ /static/ {
         include /etc/nginx/mime.types;
         root /home/titan/Titan/webapp/titanembeds/;
@@ -168,5 +169,3 @@ server {
     }
 }' > /tmp/nginx.conf
 
-# install nginx
-apt -y install nginx
