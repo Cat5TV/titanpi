@@ -13,15 +13,15 @@ if [[ ! -d /var/www ]]; then
   mkdir /var/www
 fi
 
-# Allow the titan user (systemd service runner) to read/write
-chown titan:titan /var/www
-
 if [[ ! -d /var/www/Titan/webapp ]]; then
   cd /var/www
   git clone https://github.com/TitanEmbeds/Titan
   # We will be adding configs, so let's just let this be a local version
   rm -rf /var/www/Titan/.git
 fi
+
+# Allow the titan user (systemd service runner) to read/write
+chown -R titan:www-data /var/www
 
 # Install dependencies
 apt -y install build-essential checkinstall
@@ -119,9 +119,8 @@ systemctl restart ssh
 
 # Create systemd service
 # https://github.com/TitanEmbeds/ansible-playbooks/blob/master/roles/setup/files/titanembeds.service#L8
-echo "
-[Unit]
-Description=gunicorn server instance configured to serve titanembeds
+echo "[Unit]
+Description=TitanPi gunicorn server
 After=syslog.target
 
 [Service]
@@ -205,7 +204,8 @@ systemctl restart nginx
 
 
 # Install and enable the bot
-echo "Description=Titan Discord Bot
+echo "[Unit]
+Description=TitanPi Discord Bot
 After=network.target
 
 [Service]
@@ -231,10 +231,15 @@ config = {
     'titan-web-app-secret': "app secret from the webapp config",
     'discord-bots-org-token': "DiscordBots.org Post Stats Token",
     'bots-discord-pw-token': "bots.discord.pw Post Stats Token",
-    'logging-location': "/home/titan/Titan/discordbot/titanbot.log",
+    'logging-location': "/var/www/Titan/discordbot/titanbot.log",
     "sentry-dsn": "Copy the dns string when creating a project on sentry",
 }" > /var/www/Titan/discordbot/config.py
 
 systemctl start titanbot
 systemctl enable titanbot
 
+# Install and configure monit
+apt -y install monit
+echo "
+
+" > /etc/monit/conf.d/titanpi.conf
