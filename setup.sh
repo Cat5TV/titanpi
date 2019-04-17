@@ -258,3 +258,11 @@ apt -y install monit
 echo "
 
 " > /etc/monit/conf.d/titanpi.conf
+
+hn=$(/bin/hostname)
+printf "Changing Hostname... "
+/bin/sed -i -- 's/'"$hn"'/titanpi/g' /etc/hosts
+/bin/sed -i -- 's/'"$hn"'/titanpi/g' /etc/hostname
+hostnamectl set-hostname titanpi
+echo Done.
+echo Change will take effect at next reboot.
