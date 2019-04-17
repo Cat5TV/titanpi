@@ -142,7 +142,7 @@ systemctl daemon-reload
 # Start Titan Embeds service
 systemctl start titanembeds
 systemctl enable titanembeds
-systemctl status titanembeds
+systemctl --no-pager status titanembeds
 
 # Install nginx
 apt -y install nginx
