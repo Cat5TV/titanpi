@@ -34,3 +34,15 @@ echo "config = {
     'sentry-js-dsn': 'Same as above, but you can create a seperate sentry project to track the client side js errors',
 }
 " > /var/www/Titan/webapp/config.py
+
+echo "config = {
+    'bot-token': "Discord bot token",
+    'database-uri': "postgresql://titan:titan@localhost/titan",
+    'redis-uri': "redis://",
+    'titan-web-url': "https://titanembeds.com/",
+    'titan-web-app-secret': "app secret from the webapp config",
+    'discord-bots-org-token': "DiscordBots.org Post Stats Token",
+    'bots-discord-pw-token': "bots.discord.pw Post Stats Token",
+    'logging-location': "/var/www/Titan/discordbot/titanbot.log",
+    "sentry-dsn": "Copy the dns string when creating a project on sentry",
+}" > /var/www/Titan/discordbot/config.py
