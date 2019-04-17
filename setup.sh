@@ -29,6 +29,8 @@ apt -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev 
 apt -y install python libffi-dev
 apt -y install postgresql postgresql-client
 apt -y install sudo
+apt -y install tcl8.5
+apt -y install libpq-dev # required for psycopg2/psycopg2-binary
 
 # Install Python 3.7
 cd /tmp
